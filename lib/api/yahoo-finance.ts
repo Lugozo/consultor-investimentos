@@ -1,7 +1,8 @@
 import yahooFinance from 'yahoo-finance2'
 import type { AtivoInfo } from '@/types'
 
-function mapClasse(quote: yahooFinance.Quote): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapClasse(quote: any): string {
   const type = quote.quoteType?.toLowerCase() ?? ''
   const symbol = quote.symbol ?? ''
   if (type === 'etf' || symbol.includes('FII')) return 'fiis'
@@ -12,7 +13,8 @@ function mapClasse(quote: yahooFinance.Quote): string {
 export async function buscarAtivo(ticker: string): Promise<AtivoInfo | null> {
   try {
     const symbol = ticker.endsWith('.SA') ? ticker : `${ticker}.SA`
-    const quote = await yahooFinance.quote(symbol)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const quote: any = await yahooFinance.quote(symbol)
     return {
       ticker,
       nome: quote.longName ?? quote.shortName ?? ticker,
@@ -35,9 +37,10 @@ export async function buscarAtivo(ticker: string): Promise<AtivoInfo | null> {
 export async function buscarMultiplosAtivos(tickers: string[]): Promise<AtivoInfo[]> {
   const symbols = tickers.map(t => t.endsWith('.SA') ? t : `${t}.SA`)
   try {
-    const quotes = await yahooFinance.quote(symbols)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const quotes: any = await yahooFinance.quote(symbols)
     const results = Array.isArray(quotes) ? quotes : [quotes]
-    return results.map(q => ({
+    return results.map((q: any) => ({
       ticker: q.symbol?.replace('.SA', '') ?? '',
       nome: q.longName ?? q.shortName ?? '',
       classe: mapClasse(q),
