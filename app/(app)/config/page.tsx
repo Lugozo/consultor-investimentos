@@ -6,11 +6,12 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatarDataCompleta } from '@/lib/utils/format'
 import { UpgradeButton } from './upgrade-button'
+import { ActivateCheckout } from './activate-checkout'
 
 export default async function ConfigPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout?: string }>
+  searchParams: Promise<{ checkout?: string; session_id?: string }>
 }) {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
@@ -18,6 +19,7 @@ export default async function ConfigPage({
 
   const sp = await searchParams
   const checkoutStatus = sp?.checkout
+  const sessionId = sp?.session_id
 
   const plano = await getPlano(user.id)
   const planoLabel = plano === 'active' ? 'Premium' : 'Free'
@@ -27,11 +29,14 @@ export default async function ConfigPage({
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
 
-      {checkoutStatus === 'success' && (
+      {checkoutStatus === 'success' && sessionId && (
+        <ActivateCheckout sessionId={sessionId} />
+      )}
+
+      {checkoutStatus === 'success' && !sessionId && (
         <Card className="mb-6 border-green-300 bg-green-50">
           <p className="text-green-800 text-sm">
-            Pagamento confirmado! Seu plano Premium será ativado em instantes.
-            Recarregue a página em alguns segundos.
+            Pagamento confirmado! Recarregue a página.
           </p>
         </Card>
       )}

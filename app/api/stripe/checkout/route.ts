@@ -43,7 +43,7 @@ export async function POST() {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/config?checkout=success`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/config?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/config?checkout=canceled`,
     })
 
