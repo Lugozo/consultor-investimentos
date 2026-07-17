@@ -1,5 +1,6 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { MetaCard } from '@/components/metas/meta-card'
+import { EmptyState } from '@/components/ui/empty-state'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,18 @@ export default async function MetasPage() {
           ))}
         </div>
       ) : (
-        <p className="text-slate-500">Nenhuma meta cadastrada ainda.</p>
+        <EmptyState
+          title="Nenhuma meta cadastrada"
+          description="Crie metas financeiras para acompanhar seu progresso."
+          action={
+            <Link href="/metas/nova">
+              <Button variant="outline">+ Nova Meta</Button>
+            </Link>
+          }
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9V1"/><path d="m15 4-3-3-3 3"/></svg>
+          }
+        />
       )}
     </div>
   )

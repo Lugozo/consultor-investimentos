@@ -62,7 +62,7 @@ export function SimuladorPanel({ alocacoes, carteiraId }: { alocacoes: CarteiraA
                 max={100}
                 value={s.pct}
                 onChange={e => atualizar(i, Number(e.target.value))}
-                className="w-full"
+                className="w-full slider-styled"
               />
             </div>
           ))}
@@ -74,7 +74,7 @@ export function SimuladorPanel({ alocacoes, carteiraId }: { alocacoes: CarteiraA
       </Card>
 
       {resultado && (
-        <Card>
+        <Card className="animate-[fadeIn_300ms_ease-out]">
           <CardHeader><CardTitle>Resultado da Simulação</CardTitle></CardHeader>
           <div className="space-y-3">
             <div>

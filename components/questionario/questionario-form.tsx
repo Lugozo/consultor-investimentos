@@ -248,13 +248,13 @@ export function QuestionarioForm() {
   return (
     <Card className="max-w-lg mx-auto">
       <CardHeader>
-        <CardTitle>{passo.titulo}</CardTitle>
+        <CardTitle key={passoAtual} className="animate-[fadeIn_300ms_ease-out]">{passo.titulo}</CardTitle>
         <p className="text-sm text-slate-500">
           Pergunta {passoAtual + 1} de {passos.length}
         </p>
       </CardHeader>
 
-      <div className="mb-6">{renderInput()}</div>
+      <div key={`input-${passoAtual}`} className="mb-6 animate-[fadeIn_300ms_ease-out]">{renderInput()}</div>
 
       {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
 

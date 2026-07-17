@@ -1,6 +1,7 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { verificarRebalanceamento } from '@/lib/carteira/rebalanceamento'
 import { isPremium } from '@/lib/stripe/queries'
 import { redirect } from 'next/navigation'
@@ -137,16 +138,18 @@ export default async function DashboardPage() {
       )}
 
       {(!carteiras || carteiras.length === 0) && perfil && (
-        <Card className="mb-8">
-          <div className="text-center">
-            <p className="text-slate-600 mb-4">
-              Você ainda não tem uma carteira gerada.
-            </p>
+        <EmptyState
+          title="Nenhuma carteira gerada"
+          description="Gere sua primeira carteira com ativos reais baseada no seu perfil de investidor."
+          action={
             <Link href="/questionario/resultado">
               <Button>Gerar Minha Carteira</Button>
             </Link>
-          </div>
-        </Card>
+          }
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          }
+        />
       )}
 
       {metas && metas.length > 0 && (

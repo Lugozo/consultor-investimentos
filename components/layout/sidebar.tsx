@@ -6,12 +6,20 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 
+const icons: Record<string, React.ReactNode> = {
+  dashboard: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>,
+  carteira: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>,
+  ativos: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
+  metas: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9V1"/><path d="m15 4-3-3-3 3"/></svg>,
+  config: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+}
+
 const links = [
-  { href: '/dashboard', label: 'Dashboard', icon: '\u{1F4CA}' },
-  { href: '/carteira', label: 'Carteiras', icon: '\u{1F4BC}' },
-  { href: '/ativos', label: 'Ativos', icon: '\u{1F50D}' },
-  { href: '/metas', label: 'Metas', icon: '\u{1F3AF}' },
-  { href: '/config', label: 'Configurações', icon: '⚙️' },
+  { href: '/dashboard', label: 'Dashboard', iconKey: 'dashboard' as const },
+  { href: '/carteira', label: 'Carteiras', iconKey: 'carteira' as const },
+  { href: '/ativos', label: 'Ativos', iconKey: 'ativos' as const },
+  { href: '/metas', label: 'Metas', iconKey: 'metas' as const },
+  { href: '/config', label: 'Configurações', iconKey: 'config' as const },
 ]
 
 export function Sidebar() {
@@ -25,6 +33,7 @@ export function Sidebar() {
     <nav className="flex-1 px-3 py-4 space-y-1">
       {links.map(link => {
         const active = pathname.startsWith(link.href)
+        const icon = icons[link.iconKey]
         return (
           <Link
             key={link.href}
@@ -36,7 +45,7 @@ export function Sidebar() {
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <span>{link.icon}</span>
+            <span aria-hidden="true">{icon}</span>
             {link.label}
           </Link>
         )
