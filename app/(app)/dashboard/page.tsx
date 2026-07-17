@@ -2,6 +2,7 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { verificarRebalanceamento } from '@/lib/carteira/rebalanceamento'
+import { isPremium } from '@/lib/stripe/queries'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -9,6 +10,8 @@ export default async function DashboardPage() {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const premium = await isPremium(user.id)
 
   const { data: perfil } = await supabase
     .from('perfis_investidor')
@@ -31,9 +34,9 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  // Verifica rebalanceamento na primeira carteira ativa
+  // Verifica rebalanceamento (apenas Premium)
   let desvios: Awaited<ReturnType<typeof verificarRebalanceamento>> = []
-  if (carteiras && carteiras.length > 0) {
+  if (premium && carteiras && carteiras.length > 0) {
     const primeiraCarteira = carteiras[0]
     const [{ data: alocacoes }, { data: ativos }] = await Promise.all([
       supabase.from('carteiras_alocacao').select('*').eq('carteira_id', primeiraCarteira.id),

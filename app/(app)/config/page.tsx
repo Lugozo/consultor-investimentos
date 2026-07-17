@@ -1,14 +1,20 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { getPlano } from '@/lib/stripe/queries'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatarDataCompleta } from '@/lib/utils/format'
+import { UpgradeButton } from './upgrade-button'
 
 export default async function ConfigPage() {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const plano = await getPlano(user.id)
+  const planoLabel = plano === 'active' ? 'Premium' : 'Free'
+  const planoCor = plano === 'active' ? 'text-teal-700' : 'text-slate-500'
 
   return (
     <div className="max-w-lg">
@@ -29,6 +35,19 @@ export default async function ConfigPage() {
             <span className="text-slate-500">Conta criada em</span>
             <span>{user?.created_at ? formatarDataCompleta(user.created_at) : '—'}</span>
           </div>
+        </div>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader><CardTitle>Plano</CardTitle></CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <p className={`font-semibold ${planoCor}`}>{planoLabel}</p>
+            <p className="text-sm text-slate-500 mt-1">
+              {plano === 'active' ? 'R$ 19,90/mês' : 'Gratuito — 1 carteira'}
+            </p>
+          </div>
+          {plano !== 'active' ? <UpgradeButton /> : null}
         </div>
       </Card>
 

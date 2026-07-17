@@ -4,6 +4,7 @@ import { ranquearAtivos, sugerirAtivosPorClasse } from '@/lib/algorithms/selecao
 import { buscarMultiplosAtivos } from '@/lib/api/yahoo-finance'
 import { buscarCripto } from '@/lib/api/coingecko'
 import { ACOES_BR, FIIS_BR, CRIPTO_TICKERS, INTERNACIONAL_BDRS } from '@/lib/tickers'
+import { getPlano } from '@/lib/stripe/queries'
 import type { AtivoInfo, ClasseAtivo, PerfilInvestidor } from '@/types'
 
 const LIMITES: Record<string, number> = {
@@ -59,7 +60,21 @@ export async function gerarCarteira(userId: string): Promise<string> {
 
   const p = perfil as PerfilInvestidor
 
-  // 2. Mark old active carteiras as historicas
+  // 2. Check Free tier limit (1 active carteira)
+  const plano = await getPlano(userId)
+  if (plano !== 'active') {
+    const { count } = await supabase
+      .from('carteiras')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', 'ativa')
+
+    if ((count ?? 0) >= 1) {
+      throw new Error('Plano Free permite apenas 1 carteira. Faça upgrade para criar mais.')
+    }
+  }
+
+  // 3. Mark old active carteiras as historicas
   await supabase
     .from('carteiras')
     .update({ status: 'historica' })
