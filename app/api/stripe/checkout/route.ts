@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe/client'
+import { rateLimit } from '@/lib/rate-limit'
 
-export async function POST() {
+export async function POST(req: Request) {
   const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
+  // Rate limit: 5 checkout attempts per minute
+  const rl = rateLimit(`checkout:${user.id}`, 5, 60_000)
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Muitas tentativas. Aguarde um minuto.' }, { status: 429 })
   }
 
   try {

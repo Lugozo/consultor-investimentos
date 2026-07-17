@@ -21,7 +21,15 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const { ticker, nome, classe } = await req.json()
-  if (!ticker) return NextResponse.json({ error: 'ticker obrigatório' }, { status: 400 })
+  if (!ticker || typeof ticker !== 'string' || ticker.length > 20) {
+    return NextResponse.json({ error: 'ticker inválido' }, { status: 400 })
+  }
+  if (typeof nome !== 'string' || nome.length > 200) {
+    return NextResponse.json({ error: 'nome inválido' }, { status: 400 })
+  }
+  if (typeof classe !== 'string' || classe.length > 30) {
+    return NextResponse.json({ error: 'classe inválida' }, { status: 400 })
+  }
 
   const { data, error } = await supabase
     .from('watchlist')
