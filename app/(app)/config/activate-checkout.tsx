@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 
 export function ActivateCheckout({ sessionId }: { sessionId: string }) {
   const [status, setStatus] = useState<'verificando' | 'sucesso' | 'erro'>('verificando')
+  const router = useRouter()
 
   useEffect(() => {
     fetch('/api/stripe/verify-session', {
@@ -16,14 +18,14 @@ export function ActivateCheckout({ sessionId }: { sessionId: string }) {
       .then(data => {
         if (data.status === 'active') {
           setStatus('sucesso')
-          // Recarrega depois de 2s pra refletir o plano
-          setTimeout(() => window.location.reload(), 2000)
+          // Remove query params da URL, evita loop
+          setTimeout(() => router.replace('/config'), 2000)
         } else {
           setStatus('erro')
         }
       })
       .catch(() => setStatus('erro'))
-  }, [sessionId])
+  }, [sessionId, router])
 
   if (status === 'verificando') {
     return (
