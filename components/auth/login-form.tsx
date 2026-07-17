@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 export function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
@@ -53,13 +55,23 @@ export function LoginForm() {
           onChange={e => setEmail(e.target.value)}
           required
         />
-        <Input
-          label="Senha"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
+        <div className="relative">
+          <Input
+            label="Senha"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-[34px] text-xs text-slate-400 hover:text-slate-600"
+            tabIndex={-1}
+          >
+            {showPassword ? '🙈' : '👁'}
+          </button>
+        </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <Button type="submit" disabled={loading}>
           {loading ? 'Entrando...' : 'Entrar'}
@@ -72,9 +84,9 @@ export function LoginForm() {
       </div>
       <p className="mt-4 text-center text-sm text-slate-500">
         Não tem conta?{' '}
-        <a href="/cadastro" className="text-teal-700 hover:underline">
+        <Link href="/cadastro" className="text-teal-700 hover:underline">
           Criar conta
-        </a>
+        </Link>
       </p>
     </Card>
   )

@@ -19,7 +19,9 @@ export default async function MetasPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Metas Financeiras</h1>
-        <Button variant="outline">+ Nova Meta</Button>
+        <Link href="/metas/nova">
+          <Button variant="outline">+ Nova Meta</Button>
+        </Link>
       </div>
 
       {metas && metas.length > 0 ? (

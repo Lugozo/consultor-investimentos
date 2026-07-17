@@ -1,5 +1,7 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { verificarRebalanceamento } from '@/lib/carteira/rebalanceamento'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -28,6 +30,19 @@ export default async function DashboardPage() {
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
+
+  // Verifica rebalanceamento na primeira carteira ativa
+  let desvios: Awaited<ReturnType<typeof verificarRebalanceamento>> = []
+  if (carteiras && carteiras.length > 0) {
+    const primeiraCarteira = carteiras[0]
+    const [{ data: alocacoes }, { data: ativos }] = await Promise.all([
+      supabase.from('carteiras_alocacao').select('*').eq('carteira_id', primeiraCarteira.id),
+      supabase.from('carteiras_ativos').select('*').eq('carteira_id', primeiraCarteira.id),
+    ])
+    if (alocacoes && ativos) {
+      desvios = verificarRebalanceamento(alocacoes, ativos)
+    }
+  }
 
   const perfilLabels: Record<string, string> = {
     conservador: 'Conservador',
@@ -74,6 +89,27 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {desvios.length > 0 && (
+        <Card className="mb-8 border-amber-300 bg-amber-50">
+          <CardHeader>
+            <CardTitle className="text-amber-800">⚠️ Rebalanceamento Necessário</CardTitle>
+          </CardHeader>
+          <p className="text-sm text-amber-700 mb-3">
+            A alocação da sua carteira desviou mais de 5% do planejado nas seguintes classes:
+          </p>
+          <ul className="space-y-2">
+            {desvios.map(d => (
+              <li key={d.classe} className="text-sm">
+                <span className="font-medium">{d.label}</span>
+                : alvo <span className="font-medium">{d.pct_alvo}%</span>
+                , atual <span className="font-medium">{d.pct_atual}%</span>
+                {' '}(desvio de {d.diferenca}%)
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
       {carteiras && carteiras.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-4">Suas Carteiras</h2>
@@ -99,10 +135,14 @@ export default async function DashboardPage() {
 
       {(!carteiras || carteiras.length === 0) && perfil && (
         <Card className="mb-8">
-          <p className="text-slate-600">
-            Você ainda não tem carteiras.{' '}
-            <span className="text-teal-700 font-medium">Em breve você poderá gerar sua primeira carteira.</span>
-          </p>
+          <div className="text-center">
+            <p className="text-slate-600 mb-4">
+              Você ainda não tem uma carteira gerada.
+            </p>
+            <Link href="/questionario/resultado">
+              <Button>Gerar Minha Carteira</Button>
+            </Link>
+          </div>
         </Card>
       )}
 

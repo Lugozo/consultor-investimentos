@@ -1,6 +1,7 @@
 import { createServerSupabase } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { GerarCarteiraButton } from '@/components/carteira/gerar-carteira-button'
 import { gerarAlocacao } from '@/lib/algorithms/alocacao'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -72,7 +73,8 @@ export default async function ResultadoPage() {
         </div>
       </Card>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 flex-wrap">
+        <GerarCarteiraButton />
         <Link href="/questionario">
           <Button variant="outline">Refazer Questionário</Button>
         </Link>

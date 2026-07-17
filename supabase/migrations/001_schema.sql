@@ -18,6 +18,16 @@ create table public.perfis_investidor (
   unique(user_id)
 );
 
+create table public.metas (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  nome text not null,
+  valor_alvo numeric not null,
+  data_alvo date not null,
+  aporte_mensal_planejado numeric default 0,
+  created_at timestamptz not null default now()
+);
+
 create table public.carteiras (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -46,16 +56,6 @@ create table public.carteiras_ativos (
   preco_medio numeric default 0,
   preco_atual numeric default 0,
   data_atualizacao timestamptz default now()
-);
-
-create table public.metas (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  nome text not null,
-  valor_alvo numeric not null,
-  data_alvo date not null,
-  aporte_mensal_planejado numeric default 0,
-  created_at timestamptz not null default now()
 );
 
 create table public.simulacoes (

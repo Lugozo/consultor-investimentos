@@ -18,7 +18,10 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Carregando...</p>
+        <div className="text-center">
+          <div className="mb-3 h-8 w-8 animate-spin rounded-full border-2 border-teal-600 border-t-transparent mx-auto" />
+          <p className="text-slate-500">Carregando...</p>
+        </div>
       </div>
     )
   }
@@ -26,9 +29,13 @@ export function ProtectedLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto px-4 py-6 pt-16 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-6xl">
+          {children}
+        </div>
+      </main>
     </div>
   )
 }

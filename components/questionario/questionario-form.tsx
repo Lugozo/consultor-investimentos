@@ -174,6 +174,18 @@ export function QuestionarioForm() {
 
     if (insertErr) { setError(insertErr.message); setLoading(false); return }
 
+    // Gera carteira automaticamente
+    try {
+      const res = await fetch('/api/carteiras', { method: 'POST' })
+      const data = await res.json()
+      if (data.carteira_id) {
+        router.push(`/carteira/${data.carteira_id}`)
+        return
+      }
+    } catch {
+      // Fallback: vai pra resultado se geracao falhar
+    }
+
     router.push('/questionario/resultado')
   }
 
