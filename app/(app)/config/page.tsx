@@ -56,6 +56,12 @@ export default async function ConfigPage({
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
 
+      {checkoutStatus === 'success' && (
+        <Card className="mb-6 border-blue-300 bg-blue-50">
+          <p className="text-blue-800 text-xs font-mono">DEBUG: checkout={checkoutStatus} sessionId={sessionId?.substring(0,15)} plano={plano} ativacaoErro={ativacaoErro || 'vazio'}</p>
+        </Card>
+      )}
+
       {checkoutStatus === 'success' && plano !== 'active' && (
         <Card className="mb-6 border-amber-300 bg-amber-50">
           <p className="text-amber-800 text-sm">
