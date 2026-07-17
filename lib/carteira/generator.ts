@@ -3,7 +3,7 @@ import { gerarAlocacao } from '@/lib/algorithms/alocacao'
 import { ranquearAtivos, sugerirAtivosPorClasse } from '@/lib/algorithms/selecao-ativos'
 import { buscarMultiplosAtivos } from '@/lib/api/yahoo-finance'
 import { buscarCripto } from '@/lib/api/coingecko'
-import { ACOES_BR, FIIS_BR, CRIPTO_TICKERS, INTERNACIONAL_BDRS } from '@/lib/tickers'
+import { ACOES_BR, FIIS_BR, CRIPTO_TICKERS, INTERNACIONAL_BDRS, RENDA_FIXA_PRODUTOS } from '@/lib/tickers'
 import { getPlano } from '@/lib/stripe/queries'
 import type { AtivoInfo, ClasseAtivo, PerfilInvestidor } from '@/types'
 
@@ -163,6 +163,22 @@ export async function gerarCarteira(userId: string): Promise<string> {
       console.error(`[gerarCarteira] Erro ao processar classe ${classe}:`, err)
       // Continue to next class
     }
+  }
+
+  // 6. Renda Fixa — produtos estáticos (sem API pública)
+  if (alocacao.rf > 0 && RENDA_FIXA_PRODUTOS.length > 0) {
+    const rfSelecionados = RENDA_FIXA_PRODUTOS.slice(0, 6) // top 6 produtos
+    const rfRows = rfSelecionados.map(p => ({
+      carteira_id: carteiraId,
+      ticker: p.ticker,
+      nome: `${p.nome} (${p.rentabilidade})`,
+      classe: 'rf',
+      quantidade: 0,
+      preco_medio: 0,
+      preco_atual: 0,
+    }))
+
+    await supabase.from('carteiras_ativos').insert(rfRows)
   }
 
   return carteiraId

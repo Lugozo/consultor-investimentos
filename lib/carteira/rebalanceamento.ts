@@ -58,6 +58,9 @@ export function verificarRebalanceamento(
   const desvios: Desvio[] = []
 
   for (const a of alocacoes) {
+    // Renda fixa é estática — não sofre drift de mercado
+    if (a.classe_ativo === 'rf') continue
+
     const pctAtual = atual[a.classe_ativo] ?? 0
     const diff = Math.abs(a.pct_alvo - pctAtual)
 
