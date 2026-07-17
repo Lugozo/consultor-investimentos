@@ -22,22 +22,28 @@ export default async function ConfigPage({
   const sessionId = sp?.session_id
 
   // Verifica e ativa assinatura server-side
+  let ativacaoErro = ''
   if (checkoutStatus === 'success' && sessionId) {
     try {
-      const session = await stripe.checkout.sessions.retrieve(sessionId)
-      if (session.payment_status === 'paid' && session.subscription) {
-        await supabase.from('assinaturas').upsert({
-          user_id: user.id,
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: session.subscription as string,
-          status: 'active',
-          updated_at: new Date().toISOString(),
-        })
-        // Redireciona limpo (sem query params) pra mostrar Premium
-        redirect('/config')
+      if (!process.env.STRIPE_SECRET_KEY) {
+        ativacaoErro = 'STRIPE_SECRET_KEY não configurada'
+      } else {
+        const session = await stripe.checkout.sessions.retrieve(sessionId)
+        if (session.payment_status === 'paid' && session.subscription) {
+          await supabase.from('assinaturas').upsert({
+            user_id: user.id,
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: session.subscription as string,
+            status: 'active',
+            updated_at: new Date().toISOString(),
+          })
+          redirect('/config')
+        } else {
+          ativacaoErro = `Pagamento: ${session.payment_status}`
+        }
       }
-    } catch {
-      // Falha silenciosa — mostra mensagem
+    } catch (err) {
+      ativacaoErro = err instanceof Error ? err.message : String(err)
     }
   }
 
@@ -49,12 +55,20 @@ export default async function ConfigPage({
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
 
-      {checkoutStatus === 'success' && (
+      {checkoutStatus === 'success' && plano !== 'active' && (
+        <Card className="mb-6 border-amber-300 bg-amber-50">
+          <p className="text-amber-800 text-sm">
+            {ativacaoErro
+              ? `Erro na ativação: ${ativacaoErro}`
+              : 'Verificando pagamento... Recarregue se o plano não atualizar.'}
+          </p>
+        </Card>
+      )}
+
+      {checkoutStatus === 'success' && plano === 'active' && (
         <Card className="mb-6 border-green-300 bg-green-50">
           <p className="text-green-800 text-sm">
-            {plano === 'active'
-              ? 'Pagamento confirmado! Plano Premium ativado.'
-              : 'Verificando pagamento... Recarregue se o plano não atualizar.'}
+            Pagamento confirmado! Plano Premium ativado.
           </p>
         </Card>
       )}
