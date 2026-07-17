@@ -2,6 +2,8 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
+import { EvolucaoChart } from '@/components/dashboard/evolucao-chart'
+import { OnboardingFlow } from '@/components/onboarding/onboarding-flow'
 import { verificarRebalanceamento } from '@/lib/carteira/rebalanceamento'
 import { isPremium } from '@/lib/stripe/queries'
 import { redirect } from 'next/navigation'
@@ -35,16 +37,20 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  // Verifica rebalanceamento (apenas Premium)
+  // Dados da primeira carteira ativa
+  let alocacoesCarteira: { classe_ativo: string; pct_alvo: number }[] | null = null
   let desvios: Awaited<ReturnType<typeof verificarRebalanceamento>> = []
   if (premium && carteiras && carteiras.length > 0) {
     const primeiraCarteira = carteiras[0]
-    const [{ data: alocacoes }, { data: ativos }] = await Promise.all([
-      supabase.from('carteiras_alocacao').select('*').eq('carteira_id', primeiraCarteira.id),
+    const [alocacoesRes, ativosRes] = await Promise.all([
+      supabase.from('carteiras_alocacao').select('classe_ativo, pct_alvo').eq('carteira_id', primeiraCarteira.id),
       supabase.from('carteiras_ativos').select('*').eq('carteira_id', primeiraCarteira.id),
     ])
+    const alocacoes = alocacoesRes.data
+    const ativos = ativosRes.data
+    if (alocacoes) alocacoesCarteira = alocacoes
     if (alocacoes && ativos) {
-      desvios = verificarRebalanceamento(alocacoes, ativos)
+      desvios = verificarRebalanceamento(alocacoes as any[], ativos as any[])
     }
   }
 
@@ -91,6 +97,13 @@ export default async function DashboardPage() {
             <p className="text-2xl font-bold">{metas?.length ?? 0}</p>
           </Card>
         </div>
+      )}
+
+      {premium && alocacoesCarteira && (
+        <Card className="mb-8">
+          <CardHeader><CardTitle>Evolução do Patrimônio (simulação)</CardTitle></CardHeader>
+          <EvolucaoChart alocacao={Object.fromEntries(alocacoesCarteira.map(a => [a.classe_ativo, a.pct_alvo]))} />
+        </Card>
       )}
 
       {desvios.length > 0 && (
@@ -175,13 +188,15 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <p className="text-xs text-slate-400 mt-12 pt-6 border-t border-slate-100 text-center">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-12 pt-6 border-t border-slate-100 dark:border-slate-700 text-center">
         Esta ferramenta tem fins educacionais. Não constitui recomendação de investimento.
         {' '}
-        <Link href="/termos" className="underline hover:text-slate-600">Termos de Uso</Link>
+        <Link href="/termos" className="underline hover:text-slate-600 dark:hover:text-slate-300">Termos de Uso</Link>
         {' · '}
-        <Link href="/privacidade" className="underline hover:text-slate-600">Privacidade</Link>
+        <Link href="/privacidade" className="underline hover:text-slate-600 dark:hover:text-slate-300">Privacidade</Link>
       </p>
+
+      <OnboardingFlow />
     </div>
   )
 }
