@@ -168,6 +168,14 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+
+      <p className="text-xs text-slate-400 mt-12 pt-6 border-t border-slate-100 text-center">
+        Esta ferramenta tem fins educacionais. Não constitui recomendação de investimento.
+        {' '}
+        <Link href="/termos" className="underline hover:text-slate-600">Termos de Uso</Link>
+        {' · '}
+        <Link href="/privacidade" className="underline hover:text-slate-600">Privacidade</Link>
+      </p>
     </div>
   )
 }

@@ -75,9 +75,17 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-slate-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center text-sm text-slate-400">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center text-sm text-slate-400 space-y-2">
           <p>
             © {new Date().getFullYear()} Investo. Ferramenta educacional — não é recomendação de investimento.
+          </p>
+          <p className="space-x-4">
+            <Link href="/termos" className="hover:text-slate-600 underline">
+              Termos de Uso
+            </Link>
+            <Link href="/privacidade" className="hover:text-slate-600 underline">
+              Política de Privacidade
+            </Link>
           </p>
         </div>
       </footer>
