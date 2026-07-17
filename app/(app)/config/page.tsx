@@ -20,6 +20,7 @@ export default async function ConfigPage({
   const sp = await searchParams
   const checkoutStatus = sp?.checkout
   const sessionId = sp?.session_id
+  const debugInfo = JSON.stringify({ checkoutStatus, sessionId: sessionId?.substring(0, 10), hasStripeKey: !!process.env.STRIPE_SECRET_KEY })
 
   // Verifica e ativa assinatura server-side
   let ativacaoErro = ''
@@ -55,6 +56,10 @@ export default async function ConfigPage({
   return (
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
+
+      <Card className="mb-6 border-blue-300 bg-blue-50">
+        <p className="text-blue-800 text-xs font-mono">DEBUG: {debugInfo}</p>
+      </Card>
 
       {checkoutStatus === 'success' && plano !== 'active' && (
         <Card className="mb-6 border-amber-300 bg-amber-50">
