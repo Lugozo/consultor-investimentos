@@ -2,11 +2,11 @@ import { createServerSupabase } from '@/lib/supabase/server'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getPlano } from '@/lib/stripe/queries'
+import { stripe } from '@/lib/stripe/client'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatarDataCompleta } from '@/lib/utils/format'
 import { UpgradeButton } from './upgrade-button'
-import { ActivateCheckout } from './activate-checkout'
 
 export default async function ConfigPage({
   searchParams,
@@ -21,6 +21,26 @@ export default async function ConfigPage({
   const checkoutStatus = sp?.checkout
   const sessionId = sp?.session_id
 
+  // Verifica e ativa assinatura server-side
+  if (checkoutStatus === 'success' && sessionId) {
+    try {
+      const session = await stripe.checkout.sessions.retrieve(sessionId)
+      if (session.payment_status === 'paid' && session.subscription) {
+        await supabase.from('assinaturas').upsert({
+          user_id: user.id,
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string,
+          status: 'active',
+          updated_at: new Date().toISOString(),
+        })
+        // Redireciona limpo (sem query params) pra mostrar Premium
+        redirect('/config')
+      }
+    } catch {
+      // Falha silenciosa — mostra mensagem
+    }
+  }
+
   const plano = await getPlano(user.id)
   const planoLabel = plano === 'active' ? 'Premium' : 'Free'
   const planoCor = plano === 'active' ? 'text-teal-700' : 'text-slate-500'
@@ -29,14 +49,12 @@ export default async function ConfigPage({
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
 
-      {checkoutStatus === 'success' && sessionId && (
-        <ActivateCheckout sessionId={sessionId} />
-      )}
-
-      {checkoutStatus === 'success' && !sessionId && (
+      {checkoutStatus === 'success' && (
         <Card className="mb-6 border-green-300 bg-green-50">
           <p className="text-green-800 text-sm">
-            Pagamento confirmado! Recarregue a página.
+            {plano === 'active'
+              ? 'Pagamento confirmado! Plano Premium ativado.'
+              : 'Verificando pagamento... Recarregue se o plano não atualizar.'}
           </p>
         </Card>
       )}
