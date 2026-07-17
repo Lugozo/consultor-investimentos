@@ -31,7 +31,7 @@ export async function POST() {
         user_id: user.id,
         stripe_customer_id: customerId,
         status: 'free',
-      })
+      }, { onConflict: 'user_id' })
     }
 
     const session = await stripe.checkout.sessions.create({

@@ -36,7 +36,7 @@ export default async function ConfigPage({
             stripe_subscription_id: session.subscription as string,
             status: 'active',
             updated_at: new Date().toISOString(),
-          })
+          }, { onConflict: 'user_id' })
           redirect('/config')
         } else {
           ativacaoErro = `Pagamento: ${session.payment_status}`
@@ -55,30 +55,6 @@ export default async function ConfigPage({
   return (
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
-
-      {checkoutStatus === 'success' && (
-        <Card className="mb-6 border-blue-300 bg-blue-50">
-          <p className="text-blue-800 text-xs font-mono">DEBUG: checkout={checkoutStatus} sessionId={sessionId?.substring(0,15)} plano={plano} ativacaoErro={ativacaoErro || 'vazio'}</p>
-        </Card>
-      )}
-
-      {checkoutStatus === 'success' && plano !== 'active' && (
-        <Card className="mb-6 border-amber-300 bg-amber-50">
-          <p className="text-amber-800 text-sm">
-            {ativacaoErro
-              ? `Erro na ativação: ${ativacaoErro}`
-              : 'Verificando pagamento... Recarregue se o plano não atualizar.'}
-          </p>
-        </Card>
-      )}
-
-      {checkoutStatus === 'success' && plano === 'active' && (
-        <Card className="mb-6 border-green-300 bg-green-50">
-          <p className="text-green-800 text-sm">
-            Pagamento confirmado! Plano Premium ativado.
-          </p>
-        </Card>
-      )}
 
       {checkoutStatus === 'canceled' && (
         <Card className="mb-6 border-slate-300 bg-slate-50">
