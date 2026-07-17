@@ -43,6 +43,7 @@ export default async function ConfigPage({
         }
       }
     } catch (err) {
+      if (err instanceof Error && err.message === 'NEXT_REDIRECT') throw err
       ativacaoErro = err instanceof Error ? err.message : String(err)
     }
   }
